@@ -1,0 +1,211 @@
+{
+    "name": "Update Corresponding Records",
+    "description": "Copies field values between records when a form is saved, matched on a key field. Push: to every matching record in another project (or this one). Pull: into the saved record from its one match.",
+    "namespace": "HMRI\\UpdateCorrespondingRecords",
+    "documentation": "README.md",
+    "framework-version": 16,
+    "auth-ajax-actions": [ "export-instructions", "import-instructions", "run-now" ],
+    "authors": [
+        {
+            "name": "Kerrin Palazzi",
+            "email": "kerrin.palazzi@hmri.org.au",
+            "institution": "Hunter Medical Research Institute"
+        }
+    ],
+    "project-settings": [
+        {
+            "key": "summary-page",
+            "name": "<div style=\"display:inline-block;width:392px;\">View summary of update instructions:</div><div style=\"display:inline-block;width:200px;\"><a class=\"btn btn-sm btn-primaryrc\" style=\"color:#fff;\" target=\"_blank\" href=\"#\">Open<i class=\"fas fa-external-link-alt ml-1\"></i></a></div>",
+            "type": "descriptive"
+        },
+        {
+            "key": "header-log",
+            "name": "<div class=\"blue text-center\">Logging</div>",
+            "type": "descriptive"
+        },
+        {
+            "key": "log-changes",
+            "name": "<b>Log copied values</b><br>Add the copied values to the module log, for troubleshooting. Turn off afterwards (values may identify people).<br><i>Default: off</i>",
+            "required": false,
+            "type": "checkbox"
+        },
+        {
+            "key": "fail-alert-email",
+            "name": "<b>Failure alert email</b><br>Emailed when an instruction fails (no values included). Use + for more addresses.<br><i>Default: none</i>",
+            "required": false,
+            "type": "email",
+            "repeatable": true
+        },
+        {
+            "key": "section-header",
+            "name": "<div class=\"blue text-center\" style=\"position:relative;left:-8px;width:733px\">Update Instructions</div><div class=\"text-muted text-center\" style=\"margin-top:4px;\">Each instruction runs when its trigger form is saved here. The other project doesn't need the module.</div>",
+            "type": "descriptive"
+        },
+        {
+            "key": "update-config",
+            "name": "<span class=\"fs-6 badge bg-primary\">Update Configuration</span>",
+            "required": false,
+            "type": "sub_settings",
+            "repeatable": true,
+            "sub_settings": [
+                {
+                    "key": "config-description",
+                    "name": "<b>Name / description</b><br>Your notes; shown in the summary, log and emails.<br><i>Default: blank</i>",
+                    "required": false,
+                    "type": "textarea"
+                },
+                {
+                    "key": "config-enabled",
+                    "name": "<b>Enabled</b><br>Untick to pause this instruction.<br><i>Default: ticked</i>",
+                    "type": "checkbox"
+                },
+                {
+                    "key": "direction",
+                    "name": "<b>Direction</b><br>Push updates every match in the other project. Pull fills the saved record from its one match.<br><i>Default: push</i>",
+                    "required": true,
+                    "type": "radio",
+                    "choices": [
+                        { "value": "push", "name": "Push: this project &rarr; other project" },
+                        { "value": "pull", "name": "Pull: this project &larr; other project" }
+                    ]
+                },
+                {
+                    "key": "header-trigger",
+                    "name": "<div class=\"blue text-center\">Trigger (this project)</div>",
+                    "type": "descriptive"
+                },
+                {
+                    "key": "trigger-form",
+                    "name": "<b>Trigger form</b><br>Saving this form here runs the instruction. After an import, use Run now on the summary page.<br><i>Required</i>",
+                    "required": true,
+                    "type": "form-list"
+                },
+                {
+                    "key": "trigger-logic",
+                    "name": "<b>Trigger condition</b><br>Optional logic on the saved record, e.g. [consent_complete] = '2'.<br><i>Default: always run</i>",
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "header-key",
+                    "name": "<div class=\"blue text-center\">Matching Key</div>",
+                    "type": "descriptive"
+                },
+                {
+                    "key": "source-key-field",
+                    "name": "<b>Key field in this project</b><br>Its value finds the matching record(s), e.g. site. A blank key copies nothing.<br><i>Required</i>",
+                    "required": true,
+                    "type": "field-list"
+                },
+                {
+                    "key": "source-key-event",
+                    "name": "<b>Key field event</b><br>Longitudinal only: the unique event name holding the key.<br><i>Default: the event saved</i>",
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "header-dest",
+                    "name": "<div class=\"blue text-center\">Other Project</div>",
+                    "type": "descriptive"
+                },
+                {
+                    "key": "dest-project",
+                    "name": "<b>Other project</b><br>Can be this project. Needs Project Design rights in both.<br><i>Required</i>",
+                    "required": true,
+                    "type": "project-id"
+                },
+                {
+                    "key": "dest-key-field",
+                    "name": "<b>Key field in other project</b><br>Variable name, e.g. site_code. Must be unique there for a pull.<br><i>Required</i>",
+                    "required": true,
+                    "type": "text"
+                },
+                {
+                    "key": "dest-event",
+                    "name": "<b>Other project event</b><br>Longitudinal only: match in this unique event name only.<br><i>Default: any event</i>",
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "other-condition",
+                    "name": "<b>Condition in other project</b><br>Optional logic on each match, using that project's field names, e.g. [withdrawn] &lt;&gt; '1'. Matches where it's false are left alone.<br><i>Default: every match</i>",
+                    "required": false,
+                    "type": "text"
+                },
+                {
+                    "key": "header-copy",
+                    "name": "<div class=\"blue text-center\">Fields to Copy</div>",
+                    "type": "descriptive"
+                },
+                {
+                    "key": "header-copy-info",
+                    "name": "<div style=\"color:#0a58ca;\">Choose <b>either</b> an entire instrument (plus any extra fields from other instruments under Also copy), <b>or</b> no instrument and each field under Also copy. Values are overwritten, including with blanks, unless <i>Copy only if destination field empty</i> is ticked.</div>",
+                    "type": "descriptive"
+                },
+                {
+                    "key": "copy-instrument",
+                    "name": "<b>Copy an entire instrument</b><br>Copies its fields to the same variable names in the other project. Fields that can't be copied (calculated, SQL, file, etc.) are skipped and listed on the summary page.<br><i>Default: none</i>",
+                    "required": false,
+                    "type": "form-list"
+                },
+                {
+                    "key": "instrument-only-if-empty",
+                    "name": "<b>Copy only if destination field empty (don't update)?</b><br>Applies to every field copied from that instrument. Fields that already have a value are left alone.<br><i>Default: unticked (overwrite)</i>",
+                    "type": "checkbox"
+                },
+                {
+                    "key": "leave-out",
+                    "name": "Leave out",
+                    "type": "sub_settings",
+                    "repeatable": true,
+                    "sub_settings": [
+                        {
+                            "key": "leave-out-field",
+                            "name": "<b>Field to leave out</b><br>A field on that instrument.<br><i>Default: none</i>",
+                            "required": false,
+                            "type": "field-list"
+                        }
+                    ]
+                },
+                {
+                    "key": "copy-fields",
+                    "name": "Also copy",
+                    "type": "sub_settings",
+                    "repeatable": true,
+                    "sub_settings": [
+                        {
+                            "key": "source-field",
+                            "name": "<b>Field in this project</b>",
+                            "required": false,
+                            "type": "field-list"
+                        },
+                        {
+                            "key": "dest-field",
+                            "name": "<b>Field name in other project</b><br>Blank = same name.<br><i>Default: same name</i>",
+                            "required": false,
+                            "type": "text"
+                        },
+                        {
+                            "key": "only-if-empty",
+                            "name": "<b>Copy only if destination field empty (don't update)?</b><br><i>Default: unticked (overwrite)</i>",
+                            "type": "checkbox"
+                        }
+                    ]
+                },
+                {
+                    "key": "section-ender",
+                    "name": "<div class=\"blue text-center\" style=\"position:relative;left:-8px;width:733px\">  </div>",
+                    "type": "descriptive"
+                }
+            ]
+        },
+        {
+            "key": "spacer-end-instructions",
+            "name": "<div class=\"my-2 gray text-center\" style=\"width:733px;\">End of update configuration instructions</div>",
+            "type": "descriptive"
+        }
+    ],
+    "compatibility": {
+        "redcap-version-min": "14.6.4"
+    }
+}
